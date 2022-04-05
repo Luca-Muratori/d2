@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import uniqid from "uniqid";
 
-const userRouter = express();
+const usersRouter = express.Router();
 
 const currentFilePath = fileURLToPath(import.meta.url);
 
@@ -12,15 +12,41 @@ const parentFolder = dirname(currentFilePath);
 
 const usersJSONpath = join(parentFolder, "user.json");
 
-userRouter.post("/", (req, res) => {
-  console.log(req.body);
+usersRouter.post("/", (req, res) => {
+  const newUser = {
+    ...req.body,
+    id: uniqid(),
+    dateOfBirth: new Date(),
+    avatar: `https://ui-avatars.com/api/?name=${req.body.name}+${req.body.surname}`,
+  };
+
+  const usersArray = JSON.parse(fs.readFileSync(usersJSONpath));
+  usersArray.push(newUser);
+  fs.writeFileSync(usersJSONpath, JSON.stringify(usersArray));
+  res.status(201).send({ id: newUser.id });
 });
 
-userRouter.get("/", (req, res) => {});
+usersRouter.get("/", (req, res) => {
+  console.log("hello");
+  const fileContent = fs.readFileSync(usersJSONpath);
+  const usersArray = JSON.parse(fileContent);
+  res.send(usersArray);
+});
 
-userRouter.get("/", (req, res) => {});
+usersRouter.get("/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const usersArray = JSON.parse(fs.readFileSync(usersJSONpath));
+  const foundUser = usersArray.find((user) => user.id === userId);
+  res.send(foundUser);
+});
 
-userRouter.put("/", (req, res) => {});
-userRouter.delete("/", (req, res) => {});
+usersRouter.put("/:userId", (req, res) => {
+  const usersArray = JSON.parse(fs.readFileSync(usersJSONpath));
+  const index = usersArray.findIndex((user) => user.id === req.params.userId);
+  const prePutUser = usersArray[index];
+  const updatedUser = { ...prePutUser, ...req.body, updateAt: new Date() };
+  usersArray[index] = updatedUser;
+});
+usersRouter.delete("/:userId", (req, res) => {});
 
-export default userRouter;
+export default usersRouter;
