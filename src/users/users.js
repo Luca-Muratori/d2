@@ -46,7 +46,16 @@ usersRouter.put("/:userId", (req, res) => {
   const prePutUser = usersArray[index];
   const updatedUser = { ...prePutUser, ...req.body, updateAt: new Date() };
   usersArray[index] = updatedUser;
+  fs.writeFileSync(usersJSONpath, JSON.stringify(usersArray));
+  res.send(updatedUser);
 });
-usersRouter.delete("/:userId", (req, res) => {});
+usersRouter.delete("/:userId", (req, res) => {
+  const usersArray = JSON.parse(fs.readFileSync(usersJSONpath));
+  const remainingUsers = usersArray.filter(
+    (user) => user.id !== req.params.userId
+  );
+  fs.writeFileSync(usersJSONpath, JSON.stringify(remainingUsers));
+  res.status(204).send();
+});
 
 export default usersRouter;
