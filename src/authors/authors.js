@@ -22,20 +22,17 @@ authorsRouter.post("/", (req, res) => {
   const authorsArray = JSON.parse(fs.readFileSync(authorsJSONpath));
   authorsArray.push(newAuthor);
   fs.writeFileSync(authorsJSONpath, JSON.stringify(authorsArray));
-  res
-    .status(201)
-    .send({
-      name: newAuthor.name,
-      surname: newAuthor.surname,
-      email: newAuthor.email,
-      dateOfBirth: newAuthor.dateOfBirth,
-      id: newAuthor.id,
-      avatar: newAuthor.avatar,
-    });
+  res.status(201).send({
+    name: newAuthor.name,
+    surname: newAuthor.surname,
+    email: newAuthor.email,
+    dateOfBirth: newAuthor.dateOfBirth,
+    id: newAuthor.id,
+    avatar: newAuthor.avatar,
+  });
 });
 
 authorsRouter.get("/", (req, res) => {
-  console.log("hello");
   const fileContent = fs.readFileSync(authorsJSONpath);
   const authorsArray = JSON.parse(fileContent);
   res.send(authorsArray);
