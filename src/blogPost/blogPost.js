@@ -2,74 +2,134 @@ import express from "express";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { dirname, join } from "path";
+import createError from "http-errors";
+import { checkBlogPostSchema, checkValidationResult } from "./validation.js";
 import uniqid from "uniqid";
 
 const blogPostsRouter = express.Router();
 
-const currentFilePath = fileURLToPath(import.meta.url);
+// const currentFilePath = fileURLToPath(import.meta.url);
 
-const parentFolder = dirname(currentFilePath);
+// const parentFolder = dirname(currentFilePath);
 
-const blogPostsJSONPath = join(parentFolder, "blogPost.json");
+// const blogPostsJSONPath = join(parentFolder, "blogPost.json");
 
-blogPostsRouter.post("/", (req, res) => {
-  const newBlogPost = {
-    ...req.body,
-    _id: uniqid(),
-    author: {
-      avatar: `https://ui-avatars.com/api/?name=${req.body.name}`,
-    },
-    content: "HTML",
-    createdAt: new Date(),
-  };
+const blogPostsJSONPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "blogPost.json"
+);
 
-  const blogPostsArray = JSON.parse(fs.readFileSync(blogPostsJSONPath));
-  blogPostsArray.push(newBlogPost);
-  fs.writeFileSync(blogPostsJSONPath, JSON.stringify(blogPostsArray));
-  res.status(201).send({
-    _id: newBlogPost._id,
-    category: newBlogPost.category,
-    title: newBlogPost.title,
-    cover: newBlogPost.cover,
-    readTime: {
-      value: newBlogPost.readTime.value,
-      unit: newBlogPost.readTime.unit,
-    },
-    author: {
-      name: newBlogPost.author.name,
-      avatar: newBlogPost.author.avatar,
-    },
-    content: newBlogPost.content,
-    createdAt: newBlogPost.createdAt,
-  });
+const getBlogPosts = () => JSON.parse(fs.readFileSync(blogPostsJSONPath));
+const writeBlogPosts = (content) => {
+  fs.writeFileSync(blogPostsJSONPath, JSON.stringify(content));
+};
+
+blogPostsRouter.post(
+  "/",
+  checkBlogPostSchema,
+  checkValidationResult,
+  (req, res, next) => {
+    try {
+      const newBlogPost = {
+        ...req.body,
+        _id: uniqid(),
+        author: {
+          avatar: `https://ui-avatars.com/api/?name=${req.body.author.name}`,
+          name: req.body.author.name,
+        },
+        content: "HTML",
+        createdAt: new Date(),
+      };
+
+      const blogPosts = getBlogPosts();
+      blogPosts.push(newBlogPost);
+      writeBlogPosts(blogPosts);
+      res.status(201).send({
+        _id: newBlogPost._id,
+        category: newBlogPost.category,
+        title: newBlogPost.title,
+        cover: newBlogPost.cover,
+        readTime: {
+          value: newBlogPost.readTime.value,
+          unit: newBlogPost.readTime.unit,
+        },
+        author: {
+          name: newBlogPost.author.name,
+          avatar: newBlogPost.author.avatar,
+        },
+        content: newBlogPost.content,
+        createdAt: newBlogPost.createdAt,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+blogPostsRouter.get("/", (req, res, next) => {
+  try {
+    const blogPosts = getBlogPosts();
+    if (req.query && req.query.category) {
+      const filteredBlogPosts = blogPosts.filter(
+        (blogPost) => blogPost.category.name == req.query.category
+      );
+      res.send(filteredBlogPosts);
+    } else {
+      res.send(blogPosts);
+    }
+  } catch (error) {
+    next(error);
+  }
 });
-blogPostsRouter.get("/", (req, res) => {
-  const fileContent = fs.readFileSync(blogPostsJSONPath);
-  const blogPostsArray = JSON.parse(fileContent);
-  res.send(blogPostsArray);
+
+blogPostsRouter.get("/:blogPostId", (req, res, next) => {
+  try {
+    const blogPosts = getBlogPosts();
+    const findBlogPost = blogPosts.find(
+      (blogPost) => blogPost._id === req.params.blogPostId
+    );
+    if (findBlogPost) {
+      res.send(findBlogPost);
+    } else {
+      next(createError(404, `Book with id ${req.params.blogPostId}`));
+    }
+  } catch (error) {
+    next(error);
+  }
 });
-blogPostsRouter.get("/:blogPostId", (req, res) => {
-  const blogPostId = req.params.blogPostId;
-  const fileContent = fs.readFileSync(blogPostsJSONPath);
-  const blogPostsArray = JSON.parse(fileContent);
-  const findAuthor = blogPostsArray.find((author) => author.id === blogPostId);
-  res.send(findAuthor);
+
+blogPostsRouter.put("/:blogPostId", (req, res, next) => {
+  try {
+    const blogPosts = getBlogPosts();
+    const index = blogPosts.findIndex(
+      (blogPost) => blogPost._id === req.params.blogPostId
+    );
+    const oldBlogPost = blogPosts[index];
+    const updatedBlogPost = {
+      ...oldBlogPost,
+      ...req.body,
+      updatedAt: new Date(),
+    };
+
+    blogPosts[index] = updatedBlogPost;
+    writeBlogPosts(blogPosts);
+    res.send(updatedBlogPost);
+  } catch (error) {
+    next(error);
+  }
 });
-blogPostsRouter.put("/:blogPostId", (req, res) => {
-  const fileContent = fs.readFileSync(blogPostsJSONPath);
-  const blogPostsArray = JSON.parse(fileContent);
-  const index = blogPostsArray.findIndex(
-    (blogPost) => blogPost._id === req.params.blogPostId
-  );
-});
-blogPostsRouter.delete("/:blogPostId", (req, res) => {
-  const fileContent = fs.readFileSync(blogPostsJSONPath);
-  const blogPostsArray = JSON.parse(fileContent);
-  const remainingBlogPosts = blogPostsArray.filter(
-    (blogPost) => blogPost._id !== req.params._id
-  );
-  fs.writeFileSync(blogPostsJSONPath, JSON.stringify(remainingBlogPosts));
-  res.status(201).send();
+
+blogPostsRouter.delete("/:blogPostId", (req, res, next) => {
+  try {
+    const blogPost = getBlogPosts();
+    const remainingBlogposts = blogPost.filter(
+      (blogPost) => blogPost._id !== req.params.blogPostId
+    );
+    writeBlogPosts(remainingBlogposts);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default blogPostsRouter;

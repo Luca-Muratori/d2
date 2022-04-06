@@ -1,0 +1,15 @@
+[
+  {
+    "category": "Romance",
+    "title": "Twilight",
+    "cover": "https://picsum.photos/200/309",
+    "readTime": { "value": 6, "unit": "minute" },
+    "author": {
+      "avatar": "https://ui-avatars.com/api/?name=Francesco",
+      "name": "Francesco"
+    },
+    "_id": "zsh3kl1nr59nz",
+    "content": "HTML",
+    "createdAt": "2022-04-06T15:55:45.838Z"
+  }
+]
