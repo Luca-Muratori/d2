@@ -60,7 +60,6 @@ blogPostsRouter.post(
   multer().single("cover"),
   async (req, res, next) => {
     try {
-      req;
       await saveBlogPostCover(req.file.originalname, req.file.buffer);
       res.send();
     } catch (error) {
