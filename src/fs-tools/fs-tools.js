@@ -6,12 +6,16 @@ const { readJSON, writeJSON, writeFile } = fs;
 
 const dataFolderPath = join(dirname(fileURLToPath(import.meta.url)), "../data");
 const authorsJSONPath = join(dataFolderPath, "authors.json");
-console.log(authorsJSONPath);
 const blogPostsJSONPath = join(dataFolderPath, "blogPost.json");
-console.log(blogPostsJSONPath);
 
-const authorsFolderPath = join(process.cwd(), "../../public/img/avatar");
-const blogPostFolderPath = join(process.cwd(), "../../public/img/blogPost");
+const authorsFolderPath = join(
+  process.cwd(),
+  "../../m5/d2-d3-d4/public/img/avatar"
+);
+const blogPostFolderPath = join(
+  process.cwd(),
+  "../../m5/d2-d3-d4/public/img/cover"
+);
 
 export const getBlogPosts = () => readJSON(blogPostsJSONPath);
 export const writeBlogPosts = (content) =>
