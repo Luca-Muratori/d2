@@ -1,5 +1,7 @@
+import multer from "multer";
+
 export const badRequestErrorHandler = (err, req, res, next) => {
-  if (err.status === 400) {
+  if (err.status === 400 || err instanceof multer.MulterError) {
     res.status(400).send({ message: err.message, errorsList: err.errorsList });
   } else {
     next(err);

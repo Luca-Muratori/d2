@@ -1,7 +1,9 @@
 import express from "express";
+import multer from "multer";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { saveAuthorAvatar } from "../../fs-tools/fs-tools.js";
 import uniqid from "uniqid";
 
 const authorsRouter = express.Router();
@@ -31,6 +33,19 @@ authorsRouter.post("/", (req, res) => {
     avatar: newAuthor.avatar,
   });
 });
+
+authorsRouter.post(
+  "/:authorId/uploadAvatar",
+  multer().single("avatar"),
+  async (req, res, next) => {
+    try {
+      await saveAuthorAvatar(req.file.originalname, req.file.buffer);
+      res.send();
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 authorsRouter.get("/", (req, res) => {
   const fileContent = fs.readFileSync(authorsJSONpath);

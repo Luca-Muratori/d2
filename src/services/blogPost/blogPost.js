@@ -1,8 +1,10 @@
-import express from "express";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { dirname, join } from "path";
 import createError from "http-errors";
+import express from "express";
+import multer from "multer";
+import { saveBlogPostCover } from "../../fs-tools/fs-tools.js";
 import { checkBlogPostSchema, checkValidationResult } from "./validation.js";
 import uniqid from "uniqid";
 
@@ -60,6 +62,19 @@ blogPostsRouter.post(
         content: newBlogPost.content,
         createdAt: newBlogPost.createdAt,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+blogPostsRouter.post(
+  "/:blogPostId/uploadCover",
+  multer().single("cover"),
+  async (req, res, next) => {
+    try {
+      await saveBlogPostCover(req.file.originalname, req.file.buffer);
+      res.send();
     } catch (error) {
       next(error);
     }
