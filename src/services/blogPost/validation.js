@@ -39,6 +39,18 @@ const blogPostSchema = {
       errorMessage: "insert the author name",
     },
   },
+  "comments.title": {
+    in: ["body"],
+    isString: {
+      errorMessage: "insert a valid title",
+    },
+  },
+  "comments.text": {
+    in: ["body"],
+    isString: {
+      errorMessage: "insert a valid text",
+    },
+  },
 };
 
 export const checkBlogPostSchema = checkSchema(blogPostSchema);

@@ -31,6 +31,7 @@ blogPostsRouter.post(
       };
 
       const blogPosts = await getBlogPosts();
+      console.log(blogPosts);
       blogPosts.push(newBlogPost);
       await writeBlogPosts(blogPosts);
       res.status(201).send({
@@ -67,6 +68,44 @@ blogPostsRouter.post(
     }
   }
 );
+
+blogPostsRouter.post("/:blogPostId/comments", async (req, res, next) => {
+  try {
+    const blogPosts = await getBlogPosts();
+    const findBlogPost = blogPosts.find(
+      (blogPost) => blogPost._id === req.params.blogPostId
+    );
+    const comment = findBlogPost.comment;
+    console.log(comment);
+    const newComment = {
+      ...req.body,
+    };
+    comment.push(newComment);
+    res.status(201).send({
+      text: newComment.text,
+      title: newComment.title,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+blogPostsRouter.get("/:blogPostId/comments", async (req, res, next) => {
+  try {
+    const blogPosts = await getBlogPosts();
+    const findBlogPost = blogPosts.find(
+      (blogPost) => blogPost._id === req.params.blogPostId
+    );
+    const comments = findBlogPost.comments;
+    if (findBlogPost) {
+      res.send(comments);
+    } else {
+      next(createError(404, `Book with id ${req.params.blogPostId}`));
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 blogPostsRouter.get("/", async (req, res, next) => {
   try {
