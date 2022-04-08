@@ -1,6 +1,3 @@
-import { fileURLToPath } from "url";
-import fs from "fs";
-import { dirname, join } from "path";
 import createError from "http-errors";
 import express from "express";
 import multer from "multer";
@@ -62,7 +59,18 @@ blogPostsRouter.post(
   async (req, res, next) => {
     try {
       await saveBlogPostCover(req.file.originalname, req.file.buffer);
-      res.send();
+      const blogPosts = await getBlogPosts();
+
+      const cover = `http://localhost:3001/img/cover/${req.file.originalname}`;
+      const findBlogPost = blogPosts.find(
+        (blogPost) => blogPost._id === req.params.blogPostId
+      );
+      console.log(findBlogPost);
+      if (findBlogPost) {
+        findBlogPost.cover = cover;
+        await writeBlogPosts(blogPosts);
+        res.send(findBlogPost);
+      }
     } catch (error) {
       next(error);
     }

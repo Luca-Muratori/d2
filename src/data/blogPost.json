@@ -2,7 +2,7 @@
   {
     "category": "Harry Potter",
     "title": "Expecto Patronum",
-    "cover": "https://picsum.photos/200/300",
+    "cover": "http://localhost:3001/img/cover/cygnus+widefield+-+between+tulip+and+crescent.jpg",
     "readTime": { "value": 2, "unit": "minute" },
     "author": {
       "avatar": "https://ui-avatars.com/api/?name=Luca",

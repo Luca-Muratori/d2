@@ -1,10 +1,1 @@
-[
-  {
-    "name": "Marco",
-    "surname": "Muraotir",
-    "email": "marco.muratori.94@hotmail.it",
-    "dateOfBirth": "02-12-1994",
-    "id": "zsh2osl1pcnlg5",
-    "avatar": "https://ui-avatars.com/api/?name=Marco+Muraotir"
-  }
-]
+[{"name":"Marco","surname":"Muraotir","email":"marco.muratori.94@hotmail.it","dateOfBirth":"02-12-1994","id":"zsh2osl1pcnlg5","avatar":"http://localhost:3001/img/avatar/cygnus+widefield+-+between+tulip+and+crescent.jpg"}]

@@ -1,8 +1,5 @@
 import express from "express";
 import multer from "multer";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import {
   getAuthors,
   writeAuthors,
@@ -42,7 +39,17 @@ authorsRouter.post(
   async (req, res, next) => {
     try {
       await saveAuthorAvatar(req.file.originalname, req.file.buffer);
-      res.send();
+      const authors = await getAuthors();
+      const avatar = `http://localhost:3001/img/avatar/${req.file.originalname}`;
+      const findAuthor = authors.find(
+        (author) => author.id === req.params.authorId
+      );
+      if (findAuthor) {
+        console.log(findAuthor);
+        findAuthor.avatar = avatar;
+        await writeAuthors(authors);
+        res.send(findAuthor);
+      }
     } catch (error) {
       next(error);
     }
